@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<img src="mySprites.png" id="mySprites" style="display:none" alt="">
+	<div id="targetDiv"></div>
+	<script>
+
+		// spriteCycler("ArrowLeft", "#targetDiv", "mySprites.png", 2000, 1300, 500, 650, 8, 100, true);
+		// spriteCycler("ArrowRight", "#targetDiv", "mySprites.png", 2000, 1300, 500, 650, 8, 100, false);
+
+		// spriteCycler("ArrowLeft", "#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, true);
+		// spriteCycler("ArrowRight", "#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, false);
+
+		spriteCycler("ArrowLeft", "keydown", "ArrowLeft", "keyup", "#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, true);
+		spriteCycler("ArrowRight", "keydown", "ArrowRight", "keyup","#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, false);
+
+		spriteCycler("KeyS", "keydown", "KeyD", "keydown", "#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, true);
+		spriteCycler("KeyS", "keydown", "KeyD", "keydown", "#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, false);
+
+		document.addEventListener("keydown", (e)=>{
+			console.log(e.code);
+		});
+
+		window.addEventListener("gamepadconnected", (e) => {
+		  console.log(
+		    "Gamepad connected at index %d: %s. %d buttons, %d axes.",
+		    e.gamepad.index,
+		    e.gamepad.id,
+		    e.gamepad.buttons.length,
+		    e.gamepad.axes.length
+		  );
+		});
+
+		function spriteLoopStart(targetDiv, spriteSelector, sheetWidth, sheetHeight, frameWidth, frameHeight, frameCount, frameRate, reverse=false) {
+		  var frameIndex = 0;
+		  console.log("frameIndex set to " + frameIndex);
+		  var spriteDiv = document.querySelector(targetDiv);
+		  console.log("spriteDiv selected: ", spriteDiv.outerHTML);
+		  spriteDiv.style.width = frameWidth + 'px';
+		  spriteDiv.style.height = frameHeight + 'px';
+		  spriteDiv.style.backgroundImage = 'url("' + spriteSelector + '")';
+		  spriteDiv.style.backgroundRepeat = 'no-repeat';
+		  spriteDiv.setAttribute('loopRunning', 'yes');
+		  if(reverse){
+		    spriteDiv.style.transform = "scaleX(-1)";
+		    console.log("spriteDiv reversed...");
+		  }
+		  else{
+		  	spriteDiv.style.transform = "scaleX(1)";	
+		  	console.log("spriteDiv straightened...");
+		  }
+
+		  var intervalId = false;
+
+		  if(document.querySelector("#targetDiv").getAttribute("intervalId")) {
+		      intervalId = parseInt(document.querySelector("#targetDiv").getAttribute("intervalId"));
+		      console.log("Going to clear interval by id: " + intervalId);
+			  clearInterval(intervalId);
+		  }
+
+		  console.log("intervalId ended up being: " + intervalId);
+
+		  
+		  function showNextFrame() {
+		    var frameX = (frameIndex % (sheetWidth / frameWidth)) * frameWidth;
+		    var frameY = Math.floor(frameIndex / (sheetWidth / frameWidth)) * frameHeight;
+		    
+		    spriteDiv.style.backgroundPosition = -frameX + 'px ' + -frameY + 'px';
+		    frameIndex = (frameIndex + 1) % frameCount;
+		    
+		    // intervalId = setTimeout(showNextFrame, frameRate);
+		  }
+
+		  // showNextFrame();
+
+		  intervalId = setInterval(showNextFrame, frameRate);
+		  console.log("spriteDiv before setting intervalId: " + spriteDiv.outerHTML);
+		  spriteDiv.setAttribute('intervalId', intervalId);
+		  console.log("spriteDiv after setting intervalId: " + spriteDiv.outerHTML);
+		  
+		  return intervalId;
+		}
+
+		function spriteLoopStop(targetDiv) {
+
+		  var intervalId = false;
+
+		  if(document.querySelector("#targetDiv").getAttribute("intervalId")) {
+		      intervalId = parseInt(document.querySelector("#targetDiv").getAttribute("intervalId"));
+		      console.log("Going to clear interval by id: " + intervalId);
+			  clearInterval(intervalId);
+		  }
+
+		  console.log("intervalId ended up being: " + intervalId);
+
+		  document.querySelector("#targetDiv").removeAttribute("intervalId");
+
+		}
+
+		document.addEventListener("keydown", (e)=>{
+			if(e.keyCode == "ArrowLeft"){
+				spriteLoopStart("#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, false);
+			}
+		});
+
+		document.addEventListener("keyup", (e)=>{
+			if(e.keyCode == "ArrowLeft"){
+				spriteLoopStop("#targetDiv");
+			}
+		});
+
+		function spriteCycler(startKeyCode, startEvent, stopKeyCode, stopEvent, targetDivSelector, spriteSelector, sheetWidth, sheetHeight, frameWidth, frameHeight, frameCount, frameRate, reverse = false) {
+		    var frameIndex = 0;
+		    var spriteDiv = document.querySelector(targetDivSelector);
+		    spriteDiv.style.width = frameWidth + 'px';
+		    spriteDiv.style.height = frameHeight + 'px';
+		    spriteDiv.style.backgroundImage = 'url("' + spriteSelector + '")';
+		    spriteDiv.style.backgroundRepeat = 'no-repeat';
+		  
+		  function showNextFrame() {
+		  	if (reverse) {
+		  	  spriteDiv.style.transform = 'scaleX(-1)';
+		  	}
+		  	else{
+		  		spriteDiv.style.transform = 'scaleX(1)';
+		  	}
+		    var frameX = (frameIndex % (sheetWidth / frameWidth)) * frameWidth;
+		    var frameY = Math.floor(frameIndex / (sheetWidth / frameWidth)) * frameHeight;
+		    
+		    spriteDiv.style.backgroundPosition = -frameX + 'px ' + -frameY + 'px';
+		    frameIndex = (frameIndex + 1) % frameCount;
+		    
+		    // setTimeout(showNextFrame, frameRate);
+		  }
+		  
+		  var intervalId;
+		  var loopRunning = false;
+
+		  function startLoop() {
+		  	if(loopRunning == false){	
+			    intervalId = setInterval(showNextFrame, frameRate);
+			    loopRunning = true;
+		  	}
+		  }
+
+		  function stopLoop() {
+		  	if(loopRunning == true){
+		    	clearInterval(intervalId);
+		    	loopRunning = false;
+		  	}
+		  }
+
+		  document.addEventListener(startEvent, function(event) {
+		    if (event.code === startKeyCode) {
+		      startLoop();
+		    }
+		  });
+
+		  document.addEventListener(stopEvent, function(event) {
+		    if (event.code === stopKeyCode) {
+		      stopLoop();
+		    }
+		  });
+		  
+		  document.body.appendChild(spriteDiv);
+		}
+
+
+		
+
+
+
+	</script>
+</body>
+</html>
