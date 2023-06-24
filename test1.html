@@ -30,6 +30,7 @@
 
 		var runningLeft = false;
 		var runningRight = false;
+		var jumping = false;
 
 		// Animation triggers
 
@@ -60,6 +61,13 @@
 				runningRight = false;
 			}
 		});
+
+		document.addEventListener("keydown", (e)=>{
+			if(e.code == "KeyO" && !jumping){
+				spriteOnceStart("#targetDiv", "soldier_running.png", 798, 640, 266, 320, 6, 100, false);
+				// jumping = true;
+			}
+		})
 
 		// Animation definitions
 
@@ -117,6 +125,57 @@
 
 		  document.querySelector("#targetDiv").removeAttribute("intervalId");
 
+		}
+
+		function spriteOnceStart(targetDiv, spriteSelector, sheetWidth, sheetHeight, frameWidth, frameHeight, frameCount, frameRate, reverse=false) {
+		  var frameIndex = 0;
+		  var spriteDiv = document.querySelector(targetDiv);
+		  spriteDiv.style.width = frameWidth + 'px';
+		  spriteDiv.style.height = frameHeight + 'px';
+		  spriteDiv.style.backgroundImage = 'url("' + spriteSelector + '")';
+		  spriteDiv.style.backgroundRepeat = 'no-repeat';
+		  spriteDiv.setAttribute('loopRunning', 'yes');
+		  console.log("So far so good..");
+		  if(reverse){
+		    spriteDiv.style.transform = "scaleX(-1)";
+		  }
+		  else{
+		    spriteDiv.style.transform = "scaleX(1)";  
+		  }
+
+		  var intervalId = false;
+
+		  if(document.querySelector("#targetDiv").getAttribute("intervalId")) {
+		      intervalId = parseInt(document.querySelector("#targetDiv").getAttribute("intervalId"));
+		    clearInterval(intervalId);
+		  }
+
+
+		  
+		  function showNextFrame() {
+		    var frameX = (frameIndex % (sheetWidth / frameWidth)) * frameWidth;
+		    var frameY = Math.floor(frameIndex / (sheetWidth / frameWidth)) * frameHeight;
+		    
+		    spriteDiv.style.backgroundPosition = -frameX + 'px ' + -frameY + 'px';
+		    frameIndex = (frameIndex + 1) % frameCount;
+		    
+		    // intervalId = setTimeout(showNextFrame, frameRate);
+		  }
+
+		  // showNextFrame();
+		  var count = 0;
+		  intervalId = setInterval(()=>{ 
+		    showNextFrame();
+		    count++;
+		    console.log("current count: " + count + " which is less than " + frameCount);
+		    if(count>=frameCount) {
+		    	clearInterval(intervalId);
+		    	console.log("Interval cleared");
+		    }
+		  }, frameRate);
+		  spriteDiv.setAttribute('intervalId', intervalId);
+		  
+		  return intervalId;
 		}
 
 	</script>
